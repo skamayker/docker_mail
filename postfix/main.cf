@@ -1,0 +1,131 @@
+# ============================================================
+# MAIN
+# ============================================================
+
+soft_bounce = no
+myhostname = $HOSTNAME
+mydomain = $MAIL_DOMAINE
+myorigin = $myhostname
+
+# Убираем $myhostname и $mydomain из локального класа
+# Чтобы не было do not list domain in BOTH mydestination and virtual_mailbox_domains
+mydestination = localhost.localdomain, localhost
+
+## Вписываем свои сетки
+## Обязательно отредактировать и сузить до максимально узкого диапазона
+## Лучше вообще не использовать и не позволять отправку почты без авторизации
+mynetworks = 127.0.0.0/8,172.17.0.0/16,0.0.0.0/0
+
+## Убираем nis:/ чтобы избежать спама в лог 
+## dict_nis_init: NIS domain name not set - NIS lookups disabled
+alias_maps = hash:/etc/aliases
+
+smtpd_banner = $myhostname ESMTP $mail_name
+debug_peer_level = 4
+debug_peer_list = 127.0.0.1
+# ============================================================
+# MySQL mappings
+# ============================================================
+#virtual_mailbox_maps = mysql:/etc/postfix/mysql/mysql_virtual_mailbox_maps.cf
+virtual_mailbox_domains = mysql:/etc/postfix/mysql/mysql_virtual_domains_maps.cf
+virtual_alias_maps =
+   mysql:/etc/postfix/mysql/mysql_virtual_alias_maps.cf,
+   mysql:/etc/postfix/mysql/mysql_virtual_alias_domain_maps.cf
+virtual_mailbox_maps =
+   mysql:/etc/postfix/mysql/mysql_virtual_mailbox_maps.cf,
+   mysql:/etc/postfix/mysql/mysql_virtual_alias_domain_mailbox_maps.cf
+   
+virtual_uid_maps = mysql:/etc/postfix/mysql/mysql_virtual_uid_maps.cf
+virtual_gid_maps = mysql:/etc/postfix/mysql/mysql_virtual_gid_maps.cf
+
+mail_uid = 2000
+mail_gid = 2000
+
+# Additional for quota support
+virtual_create_maildirsize = yes
+virtual_mailbox_extended = yes
+virtual_mailbox_limit_maps = mysql:/etc/postfix/mysql/mysql_virtual_mailbox_limit_maps.cf
+virtual_mailbox_limit_override = yes
+virtual_maildir_limit_message = Sorry, the user's maildir has overdrawn his diskspace quota, please try again later.
+virtual_overquota_bounce = yes
+virtual_mailbox_limit = 10485760000
+# ============================================================
+# RESTRICTIONS
+#
+# Uncomment reject_rbl_client if necessary
+# More information at: http://help.ubuntu.ru/wiki/фильтрация_спама_на_уровне_smtp_протокола
+# ============================================================
+smtpd_discard_ehlo_keywords = etrn, silent-discard
+smtpd_forbidden_commands = CONNECT GET POST
+broken_sasl_auth_clients = yes
+smtpd_delay_reject = yes
+smtpd_helo_required = no
+disable_vrfy_command = yes
+
+smtpd_helo_restrictions = permit_mynetworks,permit_sasl_authenticated
+
+smtpd_data_restrictions = permit_mynetworks,permit_sasl_authenticated,reject_unauth_pipelining,reject_multi_recipient_bounce
+
+smtpd_sender_restrictions = permit_mynetworks,permit_sasl_authenticated
+
+smtpd_recipient_restrictions = permit_mynetworks,permit_sasl_authenticated,
+           reject_unauth_destination,
+           reject_unlisted_recipient,
+           reject_non_fqdn_hostname,
+           reject_invalid_hostname,
+           reject_multi_recipient_bounce
+
+# ============================================================
+# TLS
+# ============================================================
+smtpd_enforce_tls=no
+smtpd_tls_enforce_peername = no 
+smtpd_use_tls = yes
+smtpd_tls_auth_only = no
+smtp_tls_security_level = may
+smtpd_tls_security_level = may
+smtpd_tls_loglevel = 4
+smtpd_tls_received_header = yes
+smtpd_tls_session_cache_timeout = 3600s
+smtp_tls_session_cache_database = btree:$data_directory/smtp_tls_session_cache
+smtpd_tls_key_file = /etc/postfix/certs/key.pem
+smtpd_tls_cert_file = /etc/postfix/certs/cert.pem
+tls_random_source = dev:/dev/urandom
+smtp_tls_enforce_peername = no 
+# ============================================================
+# LIMITS
+# ============================================================
+message_size_limit = 112000000
+smtpd_soft_error_limit = 10
+smtpd_hard_error_limit = 15
+smtpd_error_sleep_time = 20
+anvil_rate_time_unit = 60s
+smtpd_client_connection_count_limit = 20
+smtpd_client_connection_rate_limit = 30
+smtpd_client_message_rate_limit = 30
+smtpd_client_event_limit_exceptions = 127.0.0.0/8
+smtpd_client_connection_limit_exceptions = 127.0.0.0/8
+
+# ============================================================
+# QUEUE
+# ============================================================
+maximal_queue_lifetime = 1d
+bounce_queue_lifetime = 1d
+# ============================================================
+# SASL
+# ============================================================
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+
+# ============================================================
+# VIRTUAL
+# ============================================================
+virtual_mailbox_base = /var/vmail
+virtual_minimum_uid = 2000
+#virtual_uid_maps = static:1000
+#virtual_gid_maps = static:1000
+virtual_transport = dovecot
+dovecot_destination_recipient_limit = 1
+

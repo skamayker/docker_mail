@@ -1,0 +1,2 @@
+query = SELECT  1009 as gid
+#expansion_limit = 100

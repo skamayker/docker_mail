@@ -1,0 +1,2 @@
+query           = SELECT '/var/vmail/%d/%s/' as maildir FROM mailbox WHERE username='%s'
+#expansion_limit = 100

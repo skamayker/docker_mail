@@ -1,0 +1,2 @@
+query = SELECT 1005 as uid
+#expansion_limit = 100
