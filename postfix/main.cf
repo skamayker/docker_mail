@@ -66,7 +66,7 @@ smtpd_helo_restrictions = permit_mynetworks,permit_sasl_authenticated
 
 smtpd_data_restrictions = permit_mynetworks,permit_sasl_authenticated,reject_unauth_pipelining,reject_multi_recipient_bounce
 
-smtpd_sender_restrictions = permit_mynetworks,permit_sasl_authenticated
+smtpd_sender_restrictions = permit_mynetworks,permit_sasl_authenticated,reject_unknown_sender_domain
 
 smtpd_recipient_restrictions = permit_mynetworks,permit_sasl_authenticated,
            reject_unauth_destination,
