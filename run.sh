@@ -30,6 +30,19 @@ echo "connect = host=mysql dbname=postfix user=root password=$MYSQL_ENV_MYSQL_RO
 postconf -e "myhostname = $HOSTNAME"
 postconf -e "mydomain = $MAIL_DOMAINE"
 postconf -e "mydestination = localhost.localdomain, localhost"
+mkdir /etc/opendkim/
+opendkim-genkey -D /etc/opendkim/ -d $(hostname -d) -s $(hostname)
+chgrp opendkim /etc/opendkim/*
+chmod g+r /etc/opendkim/*
+gpasswd -a postfix opendkim
+tee -a /etc/opendkim.conf  <<EOF
+Canonicalization relaxed/relaxed
+SyslogSuccess yes
+KeyTable file:/etc/opendkim/keytable
+SigningTable file:/etc/opendkim/signingtable
+X-Header yes
+LogWhy yes
+EOF
 /etc/init.d/postfix start
 service apache2 start
 dovecot && chmod 666 /var/log/dovecot.log && chmod 777 /var/run/dovecot/auth-userdb
