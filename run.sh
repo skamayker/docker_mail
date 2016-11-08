@@ -43,6 +43,10 @@ SigningTable file:/etc/opendkim/signingtable
 X-Header yes
 LogWhy yes
 EOF
+postconf -e milter_default_action=accept
+postconf -e milter_protocol=2
+postconf -e smtpd_milters=unix:/var/run/opendkim/opendkim.sock
+postconf -e non_smtpd_milters=unix:/var/run/opendkim/opendkim.sock
 /etc/init.d/postfix start
 service apache2 start
 dovecot && chmod 666 /var/log/dovecot.log && chmod 777 /var/run/dovecot/auth-userdb
