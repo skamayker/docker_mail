@@ -44,6 +44,7 @@ dovecot unix    -       n       n       -       -      pipe
 # SMTPS
 # ====================================================================
 smtps inet    n       -       -       -       -      smtpd
+submission inet n     -       n       -       -      smtpd
 #   -o content_filter=spamassassin
 # ==========================================================================
 # service type  private unpriv  chroot  wakeup  maxproc command + args
