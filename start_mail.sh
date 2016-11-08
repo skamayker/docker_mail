@@ -1,15 +1,16 @@
 #!/bin/bash
 if [  $# -le 0 ];then
 	echo "######################################################################################################################"
-	echo "# Enter hostname, name of domain, root password for database                                                         #"
-	echo "# ./start_mail.sh mx.example.com example.com mysecretpassword                                                        #"
+	echo "# Enter hostname, name of domain, name of container and root password for database                                   #"
+	echo "# ./start_mail.sh mx.example.com example.com mx mysecretpassword                                                     #"
 	echo "######################################################################################################################"
 	exit 1
 fi
 
 HOST=$1
 MAIL=$2
-PWD=$3
+NAME=$3
+PWD=$4
 
 docker pull mysql:5.5
 docker pull zlid/mail.store
@@ -21,7 +22,7 @@ echo "auth_realms = $MAIL" >> dovecot/conf.d/10-auth.conf
 echo "auth_default_realm = $MAIL" >> dovecot/conf.d/10-auth.conf
 
 docker build -t mailserver .
-docker run  -p 25:25 -p 143:143 -p 993:993 -p 465:465 -p 587:587 -p 4322:22 -p 8081:80 --name=$MAIL --hostname=$HOST -e MAIL_DOMAINE=$MAIL  --volume=$MAIL.store:/var/vmail --link=mysql:mysql -d -t mailserver
+docker run  -p 25:25 -p 143:143 -p 993:993 -p 465:465 -p 587:587 -p 4322:22 -p 8081:80 --name=$MAIL --hostname=$NAME --domainname=$MAIL -e MAIL_DOMAINE=$MAIL  --volume=$MAIL.store:/var/vmail --link=mysql:mysql -d -t mailserver
 docker exec $MAIL db_install.sh
 docker pull jprjr/rainloop
 docker run -e NGINX=1  --name=rainloop.mail.client -d  -p 8080:80 jprjr/rainloop
