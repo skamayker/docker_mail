@@ -27,6 +27,8 @@ RUN apt-get update && \
     dovecot-sieve \
     dovecot-managesieved \
     rsyslog \
+    opendkim \
+    opendkim-tools \
     php-apc && \
     rm -rf /var/lib/apt/lists/*
 # SSH configuration
