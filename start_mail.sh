@@ -16,12 +16,12 @@ docker pull zlid/mail.store
 #docker run --name=$MAIL.store -dt zlid/mail.store
 docker volume create --name=$MAIL.database
 docker volume create --name=$MAIL.store
-docker run --name=mysql -e MYSQL_ROOT_PASSWORD=$PWD --volume=$MAIL.database:/usr/lib/mysql -dt mysql:5.5
+docker run --name=mysql -e MYSQL_ROOT_PASSWORD=$PWD --volume=$MAIL.database:/var/lib/mysql -dt mysql:5.5
 echo "auth_realms = $MAIL" >> dovecot/conf.d/10-auth.conf
 echo "auth_default_realm = $MAIL" >> dovecot/conf.d/10-auth.conf
 
 docker build -t mailserver .
-docker run  -p 25:25 -p 143:143 -p 993:993 -p 465:465 -p 587:587 -p 4322:22 -p 8081:80 --name=$MAIL --hostname=$MAIL -e MAIL_DOMAINE=$MAIL  --volume=$MAIL.store:/var/vmail --link=mysql:mysql -d -t mailserver
+docker run  -p 25:25 -p 143:143 -p 993:993 -p 465:465 -p 587:587 -p 4322:22 -p 8081:80 --name=$MAIL --hostname=$HOST -e MAIL_DOMAINE=$MAIL  --volume=$MAIL.store:/var/vmail --link=mysql:mysql -d -t mailserver
 docker exec $MAIL db_install.sh
 docker pull jprjr/rainloop
 docker run -e NGINX=1  --name=rainloop.mail.client -d  -p 8080:80 jprjr/rainloop
